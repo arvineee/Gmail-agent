@@ -114,12 +114,11 @@
     </div>
   </header>
 
-  <!-- Setup -->
   <div class="panel" id="setupGuide">
     <div class="panel-title">⚡ One-time Setup</div>
     <div class="warning">
       <strong>⚠️ Must be hosted — not opened as a local file.</strong><br>
-      Drag this HTML file to <a href="https://tiiny.host" target="_blank" style="color:#ffb400">tiiny.host</a> for a free instant URL, then use that URL everywhere below.
+      Drag this HTML file to <a href="https://tiiny.host" target="_blank" style="color:#ffb400">tiiny.host</a> or GitHub Pages, then use that URL everywhere below.
     </div>
     <div class="step">
       <div class="step-num">1</div>
@@ -151,7 +150,6 @@
     <button class="btn btn-secondary" style="margin-top:16px;font-size:12px" onclick="document.getElementById('setupGuide').classList.add('hidden')">Hide Guide</button>
   </div>
 
-  <!-- Config -->
   <div class="panel">
     <div class="panel-title">🔑 Configuration</div>
     <div class="grid2">
@@ -170,7 +168,6 @@
     </div>
   </div>
 
-  <!-- Email list -->
   <div class="panel" style="padding:0;overflow:hidden">
     <div class="emails-header">
       <h2>Inbox</h2>
@@ -181,7 +178,6 @@
     </div>
   </div>
 
-  <!-- Detail -->
   <div class="panel hidden" id="detailPanel">
     <div class="detail-subject" id="detailSubject"></div>
     <div class="detail-meta" id="detailMeta"></div>
@@ -213,7 +209,6 @@
 
 </div>
 
-<!-- Proofread notification -->
 <div class="notification" id="notification">
   <div class="notif-title">📋 Proofread before sending</div>
   <div class="notif-body" id="notifBody">Your draft is ready. Review it carefully above before sending.</div>
@@ -229,7 +224,6 @@ let emails = [];
 let selectedEmail = null;
 const catCache = {};
 
-// ── OAuth via implicit-flow popup (no external library needed) ─────────────
 function connectGmail() {
   const clientId = document.getElementById('googleClientId').value.trim();
   const geminiKey = document.getElementById('geminiKey').value.trim();
@@ -263,10 +257,10 @@ function connectGmail() {
           document.getElementById('connectBtn').textContent = '✅ Connected';
           fetchEmails();
         } else {
-          alert('Could not get access token. Check your Client ID and redirect URI.');
+          alert('Could not get access token.');
         }
       }
-    } catch(e) { /* cross-origin while navigating — keep waiting */ }
+    } catch(e) { }
     if (popup.closed) clearInterval(timer);
   }, 300);
 }
@@ -276,7 +270,6 @@ function setStatus(t, active) {
   document.getElementById('statusDot').className = 'status-dot' + (active ? ' active' : '');
 }
 
-// ── Gmail API helpers ──────────────────────────────────────────────────────
 function gFetch(url) {
   return fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } }).then(r => r.json());
 }
@@ -327,7 +320,6 @@ function renderList() {
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Select & analyze ───────────────────────────────────────────────────────
 async function selectEmail(i) {
   selectedEmail = emails[i];
   renderList();
@@ -360,10 +352,10 @@ function extractBody(payload) {
   return '';
 }
 
+/** * UPDATED: Uses response_schema to ensure clean JSON output and prevent parsing errors.
+ */
 async function analyzeWithGemini(body, key) {
-  const prompt = `You are an email assistant. Analyze this email and respond ONLY with valid JSON (no markdown, no backticks, no extra text):
-{"summary":"2-3 sentence summary","category":"work|personal|newsletter|urgent|other","replyNote":"one sentence on the reply tone","reply":"a polite concise draft reply"}
-
+  const prompt = `Analyze this email and provide a structured response.
 Subject: ${selectedEmail.subject}
 From: ${selectedEmail.from}
 Body: ${body.substring(0,2500)}`;
@@ -371,12 +363,34 @@ Body: ${body.substring(0,2500)}`;
   try {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }
+      { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents:[{parts:[{text:prompt}]}],
+          generationConfig: {
+            response_mime_type: "application/json",
+            response_schema: {
+              type: "OBJECT",
+              properties: {
+                summary: { type: "STRING" },
+                category: { type: "STRING", enum: ["work", "personal", "newsletter", "urgent", "other"] },
+                replyNote: { type: "STRING" },
+                reply: { type: "STRING" }
+              },
+              required: ["summary", "category", "replyNote", "reply"]
+            }
+          }
+        }) 
+      }
     );
     const data = await res.json();
-    let text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').replace(/```json|```/g,'').trim();
-    const p = JSON.parse(text);
+
+    if (!data.candidates || !data.candidates[0].content.parts[0].text) {
+      throw new Error("Invalid response from Gemini API.");
+    }
+
+    const p = JSON.parse(data.candidates[0].content.parts[0].text);
 
     catCache[selectedEmail.id] = p.category || 'other';
     renderList();
@@ -390,7 +404,8 @@ Body: ${body.substring(0,2500)}`;
     setTimeout(() => showNotif(p.reply), 800);
   } catch(e) {
     hide('aiLoader'); show('aiResults');
-    document.getElementById('aiSummary').textContent = 'Gemini error: ' + e.message;
+    document.getElementById('aiSummary').textContent = 'Analysis error: ' + e.message;
+    console.error(e);
   }
 }
 
@@ -398,15 +413,19 @@ async function regenerateReply() {
   const key = document.getElementById('geminiKey').value.trim();
   if (!key || !selectedEmail) return;
   document.getElementById('replyBox').value = 'Regenerating…';
-  const prompt = `Write a fresh reply to this email. Return ONLY the reply text.\nSubject: ${selectedEmail.subject}\nFrom: ${selectedEmail.from}\nPreview: ${selectedEmail.snippet}`;
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }
-  );
-  const data = await res.json();
-  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  document.getElementById('replyBox').value = reply;
-  showNotif(reply);
+  const prompt = `Write a fresh, polite email reply to this message. Return ONLY the text of the reply.\nSubject: ${selectedEmail.subject}\nFrom: ${selectedEmail.from}\nPreview: ${selectedEmail.snippet}`;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }
+    );
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    document.getElementById('replyBox').value = reply;
+    showNotif(reply);
+  } catch(e) {
+    document.getElementById('replyBox').value = 'Error regenerating reply.';
+  }
 }
 
 function clearReply() { document.getElementById('replyBox').value = ''; dismissNotif(); }
@@ -442,3 +461,4 @@ function hide(id) { document.getElementById(id).classList.add('hidden'); }
 </script>
 </body>
 </html>
+
