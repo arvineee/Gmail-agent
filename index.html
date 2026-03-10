@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gmail AI Agent</title>
+<title>Gmail AI Agent - Fixed</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -14,208 +14,74 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:var(--font-mono);min-height:100vh;overflow-x:hidden}
-  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 80% 20%,rgba(124,106,255,.08) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 20% 80%,rgba(255,106,158,.06) 0%,transparent 60%);pointer-events:none;z-index:0}
   .app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 20px}
-
   header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px}
   .logo{display:flex;align-items:center;gap:12px}
   .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
   .logo-text{font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:-.5px}
-  .logo-text span{color:var(--accent)}
-  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;transition:background .3s}
-  .status-dot.active{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px}
+  .status-dot.active{background:var(--green);box-shadow:0 0 8px var(--green)}
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px}
   .panel-title{font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
-
-  label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase}
-  input,textarea{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .2s}
-  input:focus,textarea:focus{border-color:var(--accent)}
-  input::placeholder,textarea::placeholder{color:var(--muted)}
-
+  input,textarea{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;margin-bottom:10px}
   .btn{padding:10px 20px;border:none;border-radius:8px;font-family:var(--font-head);font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
   .btn-primary{background:linear-gradient(135deg,var(--accent),#9b8aff);color:#fff}
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,106,255,.3)}
   .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
-  .btn-green{background:linear-gradient(135deg,#00c97a,var(--green));color:#0a0a0f}
-  .btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,255,176,.25)}
-  .btn-danger{background:rgba(255,80,80,.1);color:#ff6060;border:1px solid rgba(255,80,80,.2)}
-  .btn-danger:hover{background:rgba(255,80,80,.2)}
-  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
-  .btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-
-  .step{display:flex;gap:16px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
-  .step:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-  .step-num{width:28px;height:28px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:13px}
-  .step-content h4{font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:5px}
-  .step-content p{font-size:12px;color:var(--muted);line-height:1.7}
-  .step-content a{color:var(--accent);text-decoration:none}
-  code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green)}
-
-  .emails-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-  .emails-header h2{font-family:var(--font-head);font-size:16px;font-weight:700}
-  .badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--muted)}
-
-  .email-item{padding:16px 24px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
-  .email-item:last-child{border-bottom:none}
-  .email-item:hover{background:var(--surface2)}
+  .email-item{padding:16px 24px;border-bottom:1px solid var(--border);cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
   .email-item.selected{background:rgba(124,106,255,.08);border-left:3px solid var(--accent)}
-  .cat-chip{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;letter-spacing:.5px;white-space:nowrap;display:inline-block}
+  .cat-chip{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;text-transform:uppercase}
   .cat-work{background:rgba(124,106,255,.15);color:var(--accent)}
   .cat-personal{background:rgba(255,106,158,.15);color:var(--accent2)}
-  .cat-newsletter{background:rgba(255,180,0,.15);color:#ffb400}
   .cat-urgent{background:rgba(255,80,80,.15);color:#ff6060}
-  .cat-other{background:rgba(106,106,138,.15);color:var(--muted)}
-  .email-from{font-size:13px;font-weight:500}
-  .email-subject{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .email-time{font-size:11px;color:var(--muted);white-space:nowrap}
-
-  .detail-subject{font-family:var(--font-head);font-size:20px;font-weight:800;margin-bottom:8px}
-  .detail-meta{font-size:12px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:4px}
   .ai-section{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:16px}
-  .ai-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-  .ai-label::before{content:'✦';animation:spin 4s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .ai-content{font-size:13px;line-height:1.7}
-  textarea.reply-box{min-height:120px;resize:vertical;margin-top:10px;line-height:1.6}
-
-  .notification{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:20px 24px;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.5);transform:translateY(120px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);z-index:100}
-  .notification.show{transform:translateY(0);opacity:1}
-  .notif-title{font-family:var(--font-head);font-weight:800;font-size:15px;margin-bottom:6px}
-  .notif-body{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
-  .notif-actions{display:flex;gap:8px}
-
-  .empty-state{text-align:center;padding:48px;color:var(--muted)}
-  .empty-state .icon{font-size:40px;margin-bottom:12px}
-  .empty-state p{font-size:13px}
-  .loading-bar{height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent));background-size:200%;animation:shimmer 1.5s infinite;border-radius:2px}
+  .loading-bar{height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent));background-size:200%;animation:shimmer 1.5s infinite}
   @keyframes shimmer{to{background-position:-200% center}}
   .hidden{display:none!important}
-
-  .warning{background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.25);border-radius:10px;padding:14px 18px;font-size:12px;color:#ffb400;line-height:1.6;margin-bottom:20px}
-  .warning strong{font-family:var(--font-head)}
+  .notification{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:20px;max-width:360px;transform:translateY(120px);opacity:0;transition:all .4s}
+  .notification.show{transform:translateY(0);opacity:1}
 </style>
 </head>
 <body>
 <div class="app">
-
   <header>
-    <div class="logo">
-      <div class="logo-icon">📬</div>
-      <div class="logo-text">Mail<span>Agent</span></div>
-    </div>
-    <div style="font-size:12px;color:var(--muted)">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">Not connected</span>
-    </div>
+    <div class="logo"><div class="logo-icon">📬</div><div class="logo-text">Mail<span>Agent</span></div></div>
+    <div style="font-size:12px;color:var(--muted)"><span class="status-dot" id="statusDot"></span><span id="statusText">Disconnected</span></div>
   </header>
 
-  <div class="panel" id="setupGuide">
-    <div class="panel-title">⚡ One-time Setup</div>
-    <div class="warning">
-      <strong>⚠️ Must be hosted — not opened as a local file.</strong><br>
-      Drag this HTML file to <a href="https://tiiny.host" target="_blank" style="color:#ffb400">tiiny.host</a> or GitHub Pages, then use that URL everywhere below.
-    </div>
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h4>Free Gemini API Key</h4>
-        <p><a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Sign in → <strong>Create API Key</strong>. Paste below.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h4>Google Cloud OAuth Client ID</h4>
-        <p>
-          <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → New Project →
-          <strong>Enable Gmail API</strong> → APIs &amp; Services → Credentials →
-          <strong>Create OAuth 2.0 Client ID</strong> (Web app) →
-          Add your hosted URL to both <em>Authorized JavaScript Origins</em> and <em>Authorized Redirect URIs</em> →
-          Copy the <strong>Client ID</strong>.
-        </p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h4>Paste keys &amp; connect</h4>
-        <p>Fill both fields below and tap <strong>Connect Gmail</strong>. A Google sign-in popup will open.</p>
-      </div>
-    </div>
-    <button class="btn btn-secondary" style="margin-top:16px;font-size:12px" onclick="document.getElementById('setupGuide').classList.add('hidden')">Hide Guide</button>
-  </div>
-
   <div class="panel">
-    <div class="panel-title">🔑 Configuration</div>
-    <div class="grid2">
-      <div>
-        <label>Gemini API Key</label>
-        <input type="password" id="geminiKey" placeholder="AIza…"/>
-      </div>
-      <div>
-        <label>Google OAuth Client ID</label>
-        <input type="text" id="googleClientId" placeholder="xxxx.apps.googleusercontent.com"/>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="connectBtn" onclick="connectGmail()">📥 Connect Gmail</button>
-      <button class="btn btn-secondary" id="fetchBtn" onclick="fetchEmails()" disabled>🔄 Fetch Latest</button>
+    <div class="panel-title">Credentials</div>
+    <input type="password" id="geminiKey" placeholder="Gemini API Key (AIza...)"/>
+    <input type="text" id="googleClientId" placeholder="OAuth Client ID (...apps.googleusercontent.com)"/>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="connectGmail()">Connect Gmail</button>
+      <button class="btn btn-secondary" id="fetchBtn" onclick="fetchEmails()" disabled>Refresh Inbox</button>
     </div>
   </div>
 
-  <div class="panel" style="padding:0;overflow:hidden">
-    <div class="emails-header">
-      <h2>Inbox</h2>
-      <span class="badge" id="emailCount">0 emails</span>
-    </div>
-    <div id="emailList">
-      <div class="empty-state"><div class="icon">📭</div><p>Connect Gmail to load your emails</p></div>
-    </div>
+  <div class="panel" style="padding:0">
+    <div id="emailList"><div style="padding:40px;text-align:center;color:var(--muted)">Connect to load emails</div></div>
   </div>
 
   <div class="panel hidden" id="detailPanel">
-    <div class="detail-subject" id="detailSubject"></div>
-    <div class="detail-meta" id="detailMeta"></div>
+    <h2 id="detailSubject" style="margin-bottom:10px"></h2>
     <div id="aiLoader" class="hidden">
       <div class="loading-bar"></div>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:1px">GEMINI IS ANALYZING…</p>
+      <p style="font-size:11px;margin-top:8px">AI IS ANALYZING...</p>
     </div>
     <div id="aiResults" class="hidden">
+      <div class="ai-section"><div id="aiSummary"></div></div>
       <div class="ai-section">
-        <div class="ai-label">Summary</div>
-        <div class="ai-content" id="aiSummary"></div>
-      </div>
-      <div class="ai-section" style="margin-top:12px">
-        <div class="ai-label">Category</div>
-        <div id="aiCategory"></div>
-      </div>
-      <div class="ai-section" style="margin-top:12px">
-        <div class="ai-label">Suggested Reply</div>
-        <div class="ai-content" id="aiReplyNote" style="color:var(--muted);font-size:12px;margin-bottom:4px"></div>
-        <textarea class="reply-box" id="replyBox" placeholder="Draft reply will appear here…"></textarea>
-        <div class="btn-row">
-          <button class="btn btn-green" onclick="promptSend()">✉️ Review &amp; Send</button>
-          <button class="btn btn-secondary" onclick="regenerateReply()">↺ Regenerate</button>
-          <button class="btn btn-danger" onclick="clearReply()">✕ Discard</button>
-        </div>
+        <label style="font-size:10px;color:var(--accent)">AI DRAFT</label>
+        <textarea id="replyBox" style="min-height:150px;margin-top:10px"></textarea>
+        <button class="btn btn-primary" onclick="sendReply()">Send Reply</button>
       </div>
     </div>
   </div>
-
 </div>
 
 <div class="notification" id="notification">
-  <div class="notif-title">📋 Proofread before sending</div>
-  <div class="notif-body" id="notifBody">Your draft is ready. Review it carefully above before sending.</div>
-  <div class="notif-actions">
-    <button class="btn btn-green" style="font-size:12px;padding:8px 14px" onclick="sendReply()">Send Now</button>
-    <button class="btn btn-secondary" style="font-size:12px;padding:8px 14px" onclick="dismissNotif()">Edit More</button>
-  </div>
+  <div style="font-weight:bold;margin-bottom:5px">Draft Ready!</div>
+  <div id="notifBody" style="font-size:12px;color:var(--muted)">Review and send.</div>
 </div>
 
 <script>
@@ -226,238 +92,118 @@ const catCache = {};
 
 function connectGmail() {
   const clientId = document.getElementById('googleClientId').value.trim();
-  const geminiKey = document.getElementById('geminiKey').value.trim();
-  if (!clientId) return alert('Please enter your Google OAuth Client ID.');
-  if (!geminiKey) return alert('Please enter your Gemini API key.');
-
-  const redirectUri = window.location.origin + window.location.pathname;
-  const scope = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
-  const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
-    + '?client_id=' + encodeURIComponent(clientId)
-    + '&redirect_uri=' + encodeURIComponent(redirectUri)
-    + '&response_type=token'
-    + '&scope=' + encodeURIComponent(scope)
-    + '&prompt=select_account';
-
-  const popup = window.open(authUrl, 'gmailAuth', 'width=520,height=620,left=200,top=100');
-  if (!popup) return alert('Popup blocked — please allow popups for this page.');
-
+  if(!clientId) return alert("Enter Client ID");
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${window.location.origin}${window.location.pathname}&response_type=token&scope=https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send`;
+  const win = window.open(url, "_blank", "width=500,height=600");
+  
   const timer = setInterval(() => {
     try {
-      const url = popup.location.href;
-      if (url && url.includes('access_token')) {
-        clearInterval(timer);
-        popup.close();
-        const hash = url.split('#')[1] || '';
-        const params = new URLSearchParams(hash);
-        accessToken = params.get('access_token');
+      if (win.location.hash) {
+        accessToken = new URLSearchParams(win.location.hash.substring(1)).get('access_token');
         if (accessToken) {
-          setStatus('Connected ✓', true);
+          clearInterval(timer); win.close();
+          document.getElementById('statusDot').classList.add('active');
+          document.getElementById('statusText').innerText = "Connected";
           document.getElementById('fetchBtn').disabled = false;
-          document.getElementById('connectBtn').textContent = '✅ Connected';
           fetchEmails();
-        } else {
-          alert('Could not get access token.');
         }
       }
-    } catch(e) { }
-    if (popup.closed) clearInterval(timer);
-  }, 300);
-}
-
-function setStatus(t, active) {
-  document.getElementById('statusText').textContent = t;
-  document.getElementById('statusDot').className = 'status-dot' + (active ? ' active' : '');
-}
-
-function gFetch(url) {
-  return fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } }).then(r => r.json());
+    } catch(e){}
+  }, 500);
 }
 
 async function fetchEmails() {
-  if (!accessToken) return alert('Connect Gmail first.');
-  document.getElementById('emailList').innerHTML =
-    '<div class="empty-state"><div class="loading-bar" style="max-width:300px;margin:0 auto 14px"></div><p>Fetching emails…</p></div>';
-  try {
-    const list = await gFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15&labelIds=INBOX');
-    if (!list.messages) {
-      document.getElementById('emailList').innerHTML = '<div class="empty-state"><p>No emails found.</p></div>';
-      return;
-    }
-    emails = await Promise.all(list.messages.map(async m => {
-      const d = await gFetch(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata` +
-        `&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`
-      );
-      const h = d.payload.headers;
-      const get = n => (h.find(x => x.name === n) || {}).value || '';
-      return { id: m.id, threadId: d.threadId, from: get('From'), subject: get('Subject'), date: get('Date'), snippet: d.snippet };
-    }));
-    document.getElementById('emailCount').textContent = emails.length + ' emails';
-    renderList();
-  } catch(e) {
-    document.getElementById('emailList').innerHTML = `<div class="empty-state"><p>Error: ${e.message}</p></div>`;
-  }
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const data = await res.json();
+  emails = await Promise.all(data.messages.map(async m => {
+    const detail = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    }).then(r => r.json());
+    return { 
+      id: m.id, 
+      snippet: detail.snippet,
+      subject: detail.payload.headers.find(h => h.name === 'Subject')?.value || 'No Subject',
+      from: detail.payload.headers.find(h => h.name === 'From')?.value || 'Unknown'
+    };
+  }));
+  renderList();
 }
 
 function renderList() {
-  document.getElementById('emailList').innerHTML = emails.map((e, i) => {
-    const cat = catCache[e.id] || 'other';
-    const label = cat[0].toUpperCase() + cat.slice(1);
-    const date = e.date ? new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-    const from = e.from.replace(/<.*>/,'').replace(/"/g,'').trim() || e.from;
-    const sel = selectedEmail && selectedEmail.id === e.id ? ' selected' : '';
-    return `<div class="email-item${sel}" onclick="selectEmail(${i})">
-      <span class="cat-chip cat-${cat}">${label}</span>
+  document.getElementById('emailList').innerHTML = emails.map((e, i) => `
+    <div class="email-item" onclick="selectEmail(${i})">
+      <span class="cat-chip ${catCache[e.id] ? 'cat-'+catCache[e.id] : ''}">${catCache[e.id] || 'NEW'}</span>
       <div>
-        <div class="email-from">${esc(from)}</div>
-        <div class="email-subject">${esc(e.subject || '(no subject)')}</div>
+        <div style="font-weight:bold">${e.from}</div>
+        <div style="font-size:12px;color:var(--muted)">${e.subject}</div>
       </div>
-      <div class="email-time">${date}</div>
-    </div>`;
-  }).join('');
+    </div>
+  `).join('');
 }
-
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function selectEmail(i) {
   selectedEmail = emails[i];
-  renderList();
-  show('detailPanel');
-  document.getElementById('detailSubject').textContent = selectedEmail.subject || '(no subject)';
-  document.getElementById('detailMeta').innerHTML =
-    `<span>From: ${esc(selectedEmail.from)}</span>` +
-    `<span>${selectedEmail.date ? new Date(selectedEmail.date).toLocaleString() : ''}</span>`;
-  hide('aiResults'); show('aiLoader');
-  document.getElementById('replyBox').value = '';
-  dismissNotif();
-
-  const key = document.getElementById('geminiKey').value.trim();
-  if (!key) return alert('Enter your Gemini API key first.');
-
-  let body = selectedEmail.snippet;
-  try {
-    const d = await gFetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${selectedEmail.id}?format=full`);
-    body = extractBody(d.payload) || selectedEmail.snippet;
-  } catch(e) {}
-
-  analyzeWithGemini(body, key);
+  document.getElementById('detailPanel').classList.remove('hidden');
+  document.getElementById('detailSubject').innerText = selectedEmail.subject;
+  document.getElementById('aiResults').classList.add('hidden');
+  document.getElementById('aiLoader').classList.remove('hidden');
+  
+  const key = document.getElementById('geminiKey').value;
+  analyzeWithGemini(selectedEmail.snippet, key);
 }
 
-function extractBody(payload) {
-  if (!payload) return '';
-  if (payload.body && payload.body.data)
-    return atob(payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));
-  if (payload.parts) for (const p of payload.parts) { const t = extractBody(p); if (t) return t; }
-  return '';
-}
-
-/** * UPDATED: Uses response_schema to ensure clean JSON output and prevent parsing errors.
- */
 async function analyzeWithGemini(body, key) {
-  const prompt = `Analyze this email and provide a structured response.
-Subject: ${selectedEmail.subject}
-From: ${selectedEmail.from}
-Body: ${body.substring(0,2500)}`;
-
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      { 
-        method:'POST', 
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          contents:[{parts:[{text:prompt}]}],
-          generationConfig: {
-            response_mime_type: "application/json",
-            response_schema: {
-              type: "OBJECT",
-              properties: {
-                summary: { type: "STRING" },
-                category: { type: "STRING", enum: ["work", "personal", "newsletter", "urgent", "other"] },
-                replyNote: { type: "STRING" },
-                reply: { type: "STRING" }
-              },
-              required: ["summary", "category", "replyNote", "reply"]
-            }
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `Analyze this email: ${body}` }] }],
+        generationConfig: {
+          response_mime_type: "application/json",
+          response_schema: {
+            type: "OBJECT",
+            properties: {
+              summary: { type: "STRING" },
+              category: { type: "STRING", enum: ["work", "personal", "urgent", "other"] },
+              reply: { type: "STRING" }
+            },
+            required: ["summary", "category", "reply"]
           }
-        }) 
-      }
-    );
+        }
+      })
+    });
+
+    if (!res.ok) throw new Error("API Error: " + res.status);
     const data = await res.json();
-
-    if (!data.candidates || !data.candidates[0].content.parts[0].text) {
-      throw new Error("Invalid response from Gemini API.");
-    }
-
     const p = JSON.parse(data.candidates[0].content.parts[0].text);
 
-    catCache[selectedEmail.id] = p.category || 'other';
+    catCache[selectedEmail.id] = p.category;
     renderList();
-    hide('aiLoader'); show('aiResults');
-    document.getElementById('aiSummary').textContent = p.summary;
-    const cat = p.category || 'other';
-    document.getElementById('aiCategory').innerHTML =
-      `<span class="cat-chip cat-${cat}">${cat[0].toUpperCase()+cat.slice(1)}</span>`;
-    document.getElementById('aiReplyNote').textContent = p.replyNote;
+    
+    document.getElementById('aiLoader').classList.add('hidden');
+    document.getElementById('aiResults').classList.remove('hidden');
+    document.getElementById('aiSummary').innerText = p.summary;
     document.getElementById('replyBox').value = p.reply;
-    setTimeout(() => showNotif(p.reply), 800);
-  } catch(e) {
-    hide('aiLoader'); show('aiResults');
-    document.getElementById('aiSummary').textContent = 'Analysis error: ' + e.message;
-    console.error(e);
+    
+  } catch (e) {
+    alert("Gemini Error: " + e.message);
   }
 }
-
-async function regenerateReply() {
-  const key = document.getElementById('geminiKey').value.trim();
-  if (!key || !selectedEmail) return;
-  document.getElementById('replyBox').value = 'Regenerating…';
-  const prompt = `Write a fresh, polite email reply to this message. Return ONLY the text of the reply.\nSubject: ${selectedEmail.subject}\nFrom: ${selectedEmail.from}\nPreview: ${selectedEmail.snippet}`;
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }
-    );
-    const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    document.getElementById('replyBox').value = reply;
-    showNotif(reply);
-  } catch(e) {
-    document.getElementById('replyBox').value = 'Error regenerating reply.';
-  }
-}
-
-function clearReply() { document.getElementById('replyBox').value = ''; dismissNotif(); }
-function promptSend() { showNotif(document.getElementById('replyBox').value); document.getElementById('replyBox').focus(); }
 
 async function sendReply() {
-  const reply = document.getElementById('replyBox').value.trim();
-  if (!reply) return alert('Reply is empty.');
-  const to = selectedEmail.from;
-  const subject = 'Re: ' + (selectedEmail.subject || '');
-  const raw = btoa(`To: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${reply}`)
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  try {
-    await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-      method:'POST',
-      headers:{ Authorization:'Bearer '+accessToken, 'Content-Type':'application/json' },
-      body: JSON.stringify({raw, threadId: selectedEmail.threadId})
-    });
-    dismissNotif();
-    document.getElementById('replyBox').value = '';
-    alert('✅ Reply sent!');
-  } catch(e) { alert('Send error: ' + e.message); }
+  const replyText = document.getElementById('replyBox').value;
+  const raw = btoa(`To: ${selectedEmail.from}\r\nSubject: Re: ${selectedEmail.subject}\r\n\r\n${replyText}`).replace(/\+/g, '-').replace(/\//g, '_');
+  
+  await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw })
+  });
+  alert("Sent!");
 }
-
-function showNotif(reply) {
-  const preview = (reply||'').substring(0,90) + ((reply||'').length > 90 ? '…' : '');
-  document.getElementById('notifBody').textContent = `"${preview}" — Review above, then hit Send.`;
-  document.getElementById('notification').classList.add('show');
-}
-function dismissNotif() { document.getElementById('notification').classList.remove('show'); }
-function show(id) { document.getElementById(id).classList.remove('hidden'); }
-function hide(id) { document.getElementById(id).classList.add('hidden'); }
 </script>
 </body>
 </html>
