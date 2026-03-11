@@ -374,7 +374,7 @@ Body: ${body.substring(0,2500)}`;
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -416,7 +416,7 @@ async function regenerateReply() {
   document.getElementById('replyBox').value = 'Regenerating…';
   const prompt = `Write a fresh reply to this email. Return ONLY the reply text.\nSubject: ${selectedEmail.subject}\nFrom: ${selectedEmail.from}\nPreview: ${selectedEmail.snippet}`;
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
     { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }
   );
   const data = await res.json();
